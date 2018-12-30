@@ -62,6 +62,7 @@ public class EditorSpotlight : EditorWindow, IHasCustomMenu
         window.ShowUtility();
 
         window.Reset();
+        window.ShowRecently();
     }
 
     [Serializable] private class SearchHistory : ISerializationCallbackReceiver
@@ -93,8 +94,14 @@ public class EditorSpotlight : EditorWindow, IHasCustomMenu
         }
     }
 
+    [Serializable] private class SearchRecently
+    {
+        [SerializeField] public List<string> keys = new List<string>();
+    }
+
     const string PlaceholderInput = "Open Asset...";
     const string SearchHistoryKey = "SearchHistoryKey";
+    const string SearchRecentlyKey = "SearchRecentlyKey";
     public const int BaseHeight = 90;
 
     List<string> hits = new List<string>();
@@ -102,6 +109,7 @@ public class EditorSpotlight : EditorWindow, IHasCustomMenu
     int selectedIndex = 0;
 
     SearchHistory history;
+    SearchRecently recently;
 
     void Reset()
     {
@@ -109,6 +117,8 @@ public class EditorSpotlight : EditorWindow, IHasCustomMenu
         hits.Clear();
         var json = EditorPrefs.GetString(SearchHistoryKey, JsonUtility.ToJson(new SearchHistory()));
         history = JsonUtility.FromJson<SearchHistory>(json);
+        var recentlyJson = EditorPrefs.GetString(SearchRecentlyKey, JsonUtility.ToJson(new SearchRecently()));
+        recently = JsonUtility.FromJson<SearchRecently>(recentlyJson);
         Focus();
     }
 
@@ -147,7 +157,7 @@ public class EditorSpotlight : EditorWindow, IHasCustomMenu
         GUILayout.BeginHorizontal();
         GUILayout.Space(6);
 
-        if (!string.IsNullOrEmpty(input))
+        if (hits.Count > 0)
             VisualizeHits();
 
         GUILayout.Space(6);
@@ -189,6 +199,13 @@ public class EditorSpotlight : EditorWindow, IHasCustomMenu
         });
 
         hits = hits.Take(10).ToList();
+    }
+
+    void ShowRecently()
+    {
+        hits = recently.keys
+            .Take(10)
+            .ToList();
     }
 
     void HandleEvents()
@@ -328,6 +345,10 @@ public class EditorSpotlight : EditorWindow, IHasCustomMenu
 
         history.clicks[guid]++;
         EditorPrefs.SetString(SearchHistoryKey, JsonUtility.ToJson(history));
+
+        recently.keys.Remove(guid);
+        recently.keys.Insert(0, guid);
+        EditorPrefs.SetString(SearchRecentlyKey, JsonUtility.ToJson(recently));
     }
 
     UnityEngine.Object GetSelectedAsset()
