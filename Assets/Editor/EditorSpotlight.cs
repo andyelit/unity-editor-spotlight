@@ -195,7 +195,7 @@ public class EditorSpotlight : EditorWindow, IHasCustomMenu
     {
         var current = Event.current;
 
-        if (current.type == EventType.keyDown)
+        if (current.type == EventType.KeyDown)
         {
             if (current.keyCode == KeyCode.UpArrow)
             {
@@ -294,7 +294,7 @@ public class EditorSpotlight : EditorWindow, IHasCustomMenu
                 GUI.Label(labelRect, coloredAssetName.ToString(), Styles.resultLabelStyle);
             }
 
-            if (current.type == EventType.mouseDown && elementRect.Contains(current.mousePosition))
+            if (current.type == EventType.MouseDown && elementRect.Contains(current.mousePosition))
             {
                 selectedIndex = i;
                 if (current.clickCount == 2)
